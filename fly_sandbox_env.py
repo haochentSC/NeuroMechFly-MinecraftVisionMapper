@@ -13,7 +13,7 @@ from flygym.preprogrammed import all_leg_dofs
 class FlySandboxEnv(gym.Env):
     """A sandbox environment where the fly moves based on pre-recorded kinematic data."""
 
-    def __init__(self, run_time=1, timestep=1e-4):
+    def __init__(self, run_time=10, timestep=1e-4):
         super().__init__()
 
         self.run_time = run_time
@@ -44,7 +44,7 @@ class FlySandboxEnv(gym.Env):
 
         # Initialize Fly Simulation
         self.fly = Fly(init_pose="stretch", actuated_joints=self.actuated_joints, control="position")
-        self.cam = Camera(fly=self.fly, play_speed=0.2, draw_contacts=True)
+        self.cam = Camera(fly=self.fly, play_speed=1.0, draw_contacts=True)
         self.sim = SingleFlySimulation(fly=self.fly, cameras=[self.cam])
 
     def reset(self, seed=None):
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     obs, info = env.reset()
     print("Starting Simulation:")
 
-    for step in range(1000): # let's simulate 1000 steps max
+    for step in range(env.target_num_steps): # let's simulate 1000 steps max
         action = np.random.uniform(-1, 1, size=(len(env.actuated_joints),))   # your controller decides what to do based on obs: random
         obs, reward, terminated, truncated, info = env.step(action)
         #print(f"Step {step}: Reward = {reward}, Terminated = {terminated}") 
