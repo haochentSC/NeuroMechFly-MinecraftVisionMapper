@@ -1,0 +1,41 @@
+import numpy as np
+import cv2
+import matplotlib.pyplot as plt
+from flygym import Fly
+from flygym.vision.retina import Retina
+
+image_path = "test.jpg"
+raw_image = cv2.imread(image_path)
+
+if raw_image is None:
+    raise FileNotFoundError(f"Error: Image file '{image_path}' not found.")
+
+raw_image = cv2.cvtColor(raw_image, cv2.COLOR_BGR2RGB)
+
+fly = Fly(enable_vision=True)
+retina = Retina()
+
+resized_image = cv2.resize(raw_image, (retina.ncols, retina.nrows))
+
+fly_vision = retina.raw_image_to_hex_pxls(resized_image)
+
+print("Fly Vision Data Shape:", fly_vision.shape)  # Expected: (721, 2)
+
+vision_left = fly.retina.hex_pxls_to_human_readable(fly_vision, color_8bit=True)
+vision_right = vision_left  # We only have one image, so duplicate for both eyes
+
+vision_left_gray = vision_left.max(axis=-1)  # Convert (H, W, 2) → (H, W)
+vision_right_gray = vision_right.max(axis=-1)  # Convert (H, W, 2) → (H, W)
+
+fig, axs = plt.subplots(1, 2, figsize=(6, 3), tight_layout=True)
+axs[0].imshow(vision_left_gray, cmap="gray")  # Left Eye
+axs[0].set_title("Left Eye Vision")
+axs[0].axis("off")
+
+axs[1].imshow(vision_right_gray, cmap="gray")  # Right Eye
+axs[1].set_title("Right Eye Vision")
+axs[1].axis("off")
+
+plt.show()
+
+
