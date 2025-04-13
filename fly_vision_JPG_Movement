@@ -1,8 +1,10 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+import time
 from flygym.vision.retina import Retina
 
+start_time = time.time()
 image_path = "test2.jpg"
 raw_image = cv2.imread(image_path)
 if raw_image is None:
@@ -43,8 +45,12 @@ else:
 
 print(f"Movement Vector: {movement}")
 
+end_time = time.time()
+time_usage = end_time - start_time
+print(f"Time Usage: {time_usage:.4f} seconds")
+
 # --- Visualization of the Splitted Vision ---
-"""
+
 fig, axs = plt.subplots(1, 2, figsize=(10, 4), tight_layout=True)
 axs[0].imshow(human_left_gray, cmap="gray")
 axs[0].set_title("Left Eye Vision")
@@ -53,4 +59,3 @@ axs[1].imshow(human_right_gray, cmap="gray")
 axs[1].set_title("Right Eye Vision")
 axs[1].axis("off")
 plt.show()
-"""
