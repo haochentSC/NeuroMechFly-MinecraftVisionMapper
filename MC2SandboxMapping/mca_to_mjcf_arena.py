@@ -3,11 +3,9 @@ from pathlib import Path
 from dm_control import mjcf
 from flygym.arena.base import BaseArena
 
-# ---------------- Configuration ----------------
 REGION_PATH = Path("r.0.0.mca")
 CHUNK_X, CHUNK_Z = 0, 0
 
-# -------------- Surface Extraction -------------
 def extract_surface_blocks(region_path: Path, chunk_x: int, chunk_z: int):
     """
     Reads the specified region file, loads the chunk at (chunk_x, chunk_z),
