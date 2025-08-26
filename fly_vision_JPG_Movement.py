@@ -5,7 +5,7 @@ import time
 from flygym.vision.retina import Retina
 
 start_time = time.time()
-image_path = "test2.jpg"
+image_path = "test.jpg"
 raw_image = cv2.imread(image_path)
 if raw_image is None:
     raise FileNotFoundError(f"Error: Image file '{image_path}' not found.")
