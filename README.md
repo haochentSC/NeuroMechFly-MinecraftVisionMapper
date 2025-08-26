@@ -99,7 +99,13 @@ Replace flags and paths as needed for your setup.
 
 ### `fly_vision_JPG_Movement_Quick.py`
 
-* **Purpose:** A minimal prototype for rapid testing of vision-to-action loops.
+* **Purpose:** A minimal prototype for rapid testing of binocular vision-to-action loops using JPEG input.  
+* **Key Features:**
+  * Splits an input image into left/right halves to simulate compound eyes.
+  * Uses the FlyGym `Retina` model to convert images into hexagonal photoreceptor arrays.
+  * Compares left vs. right brightness to decide a simple movement vector (left, right, forward).
+  * Supports GPU-accelerated resizing and color conversion with OpenCV CUDA (fallback to CPU if unavailable).
+  * Generates human-readable grayscale plots of left and right eye vision.  
 
 ### `fly_vision_Movement_advanced.py`
 
