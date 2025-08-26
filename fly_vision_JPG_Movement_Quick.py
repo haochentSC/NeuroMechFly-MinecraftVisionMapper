@@ -4,30 +4,68 @@ import time
 import matplotlib.pyplot as plt
 from flygym.vision.retina import Retina
 
+# --- Helpers ---------------------------------------------------------------
+def has_cuda():
+    return hasattr(cv2, "cuda") and cv2.cuda.getCudaEnabledDeviceCount() > 0
+
+def cuda_resize_np(img_np, dsize, interpolation=cv2.INTER_NEAREST):
+    """Resize a NumPy HxWxC image on the GPU and return a NumPy result."""
+    g = cv2.cuda_GpuMat()
+    g.upload(img_np)
+    g_res = cv2.cuda.resize(g, dsize, interpolation=interpolation)
+    return g_res.download()
+
+def maybe_cuda_cvt_color_bgr2rgb(img_bgr, use_cuda):
+    """Optional GPU BGR->RGB; returns NumPy RGB image."""
+    if not use_cuda:
+        return cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+    g = cv2.cuda_GpuMat()
+    g.upload(img_bgr)
+    g_rgb = cv2.cuda.cvtColor(g, cv2.COLOR_BGR2RGB)
+    return g_rgb.download()
+
+def resize_img(img, size_wh, use_cuda, interpolation=cv2.INTER_NEAREST):
+    """Resize on GPU if available, else CPU."""
+    if use_cuda:
+        return cuda_resize_np(img, size_wh, interpolation=interpolation)
+    else:
+        return cv2.resize(img, size_wh, interpolation=interpolation)
+
+# --- Main ------------------------------------------------------------------
 start_time = time.time()
-# Load and prepare the image
+
 image_path = "test2.jpg"
-raw_image = cv2.imread(image_path)
-if raw_image is None:
+raw_bgr = cv2.imread(image_path)
+if raw_bgr is None:
     raise FileNotFoundError(f"Error: Image file '{image_path}' not found.")
-raw_image = cv2.cvtColor(raw_image, cv2.COLOR_BGR2RGB)
 
-mid_col = raw_image.shape[1] // 2  # Midpoint of the image width
-left_image = raw_image[:, :mid_col, :]  # Left half
-right_image = raw_image[:, mid_col:, :]  # Right half
+USE_CUDA = has_cuda()
+print(f"[INFO] OpenCV CUDA available: {USE_CUDA}")
 
+# Convert to RGB (optionally on GPU)
+raw_image = maybe_cuda_cvt_color_bgr2rgb(raw_bgr, USE_CUDA)
+
+# Split into left/right halves (NumPy)
+mid_col = raw_image.shape[1] // 2
+left_image  = raw_image[:, :mid_col, :]
+right_image = raw_image[:, mid_col:, :]
+
+# Retina target size
 retina = Retina()
+target_size = (retina.ncols, retina.nrows)  # (width, height)
 
-left_resized = cv2.resize(left_image, (retina.ncols, retina.nrows), interpolation=cv2.INTER_NEAREST)
-right_resized = cv2.resize(right_image, (retina.ncols, retina.nrows), interpolation=cv2.INTER_NEAREST)
+# --- GPU-accelerated resize (with CPU fallback) ----------------------------
+left_resized  = resize_img(left_image,  target_size, USE_CUDA, interpolation=cv2.INTER_NEAREST)
+right_resized = resize_img(right_image, target_size, USE_CUDA, interpolation=cv2.INTER_NEAREST)
 
-left_fly_vision = retina.raw_image_to_hex_pxls(left_resized).astype(np.float32)
+# Retina transforms (NumPy/CPU)
+left_fly_vision  = retina.raw_image_to_hex_pxls(left_resized).astype(np.float32)
 right_fly_vision = retina.raw_image_to_hex_pxls(right_resized).astype(np.float32)
 
-left_brightness = np.sum(left_fly_vision[:, 1])
+left_brightness  = np.sum(left_fly_vision[:, 1])
 right_brightness = np.sum(right_fly_vision[:, 1])
 
-print(f"Left Eye Brightness: {left_brightness}")
+print(f"Left Eye Brightness:  {left_brightness}")
 print(f"Right Eye Brightness: {right_brightness}")
 
 if left_brightness > right_brightness:
@@ -43,7 +81,8 @@ end_time = time.time()
 time_usage = end_time - start_time
 print(f"Optimized Time Usage: {time_usage:.4f} seconds")
 
-left_human_vision = retina.hex_pxls_to_human_readable(left_fly_vision, color_8bit=True).max(axis=-1)
+# Human-readable views for plotting (still CPU)
+left_human_vision  = retina.hex_pxls_to_human_readable(left_fly_vision,  color_8bit=True).max(axis=-1)
 right_human_vision = retina.hex_pxls_to_human_readable(right_fly_vision, color_8bit=True).max(axis=-1)
 
 fig, axs = plt.subplots(1, 2, figsize=(10, 5), tight_layout=True)
