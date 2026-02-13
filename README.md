@@ -87,6 +87,9 @@ Replace flags and paths as needed for your setup.
   ```bash
   python fly_vision_readJPG.py --input ./raw_frames --output preprocessed.npy
   ```
+  ![test2](https://github.com/user-attachments/assets/2032e716-b474-4d8b-a24d-7e7f10f215ac)
+
+<img width="1000" height="400" alt="fly_vision_JPG_Movement_output" src="https://github.com/user-attachments/assets/ef3f35c2-3d80-4cd3-b502-a285a4d1c995" />
 
 ### `fly_vision_JPG_Movement.py`
 
