@@ -122,7 +122,7 @@ Replace flags and paths as needed for your setup.
 
   * `create_arena(blocks, size)`: Builds the Minecraft arena.
   * `run_simulation(config)`: Starts the DM Control loop.
-
+<video src="outputs\gym_basics\fly_simulation.mp4" controls width="700"></video>
 ### `fly_vision_env.py`
 
 * **Purpose:** Wraps the sandbox with a Gymnasium-compatible vision API.
