@@ -1,6 +1,5 @@
 # NeuroMechFly-MinecraftVisionMapper 
 <img src="images/banner_small.jpg" width="600" />
-<img src="images/banner_small.jpg" width="600" />
 
 A sandbox environment for simulating and testing insect vision and movement pipelines using the FlyGym framework and Minecraft-based arenas.
 
